@@ -8,6 +8,7 @@ This implementation is up to 4 times faster than [openai/whisper](https://github
 
 ## Benchmark
 
+
 ### Whisper
 
 For reference, here's the time and memory usage that are required to transcribe [**13 minutes**](https://www.youtube.com/watch?v=0u7tTptBo9I) of audio using different implementations:
