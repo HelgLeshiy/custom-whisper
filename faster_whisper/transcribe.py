@@ -115,11 +115,10 @@ class BatchedInferencePipeline:
     def __init__(
         self,
         model,
-        use_vad_model: bool = True,
+        vad_model: VoiceActivitySegmentation,
         options: Optional[NamedTuple] = None,
         tokenizer=None,
         chunk_length: int = 30,
-        vad_device: Union[int, str, "torch.device"] = "auto",
         vad_onset: float = 0.500,
         vad_offset: float = 0.363,
         language: Optional[str] = None,
@@ -128,19 +127,11 @@ class BatchedInferencePipeline:
         self.tokenizer = tokenizer
         self.options = options
         self.preset_language = language
-        self.use_vad_model = use_vad_model
-        self.vad_onset = vad_onset
-        self.vad_offset = vad_offset
-        self.vad_model_path = os.path.join(get_assets_path(), "pyannote_vad_model.bin")
-        if self.use_vad_model:
-            self.vad_device = self.get_device(vad_device)
-            self.vad_model = self.load_vad_model(
-                vad_onset=self.vad_onset, vad_offset=self.vad_offset
-            )
-        else:
-            self.vad_model = None
+        self.vad_model = vad_model
         self.chunk_length = chunk_length  # VAD merging size
         self.last_speech_timestamp = 0.0
+        self.vad_onset = vad_onset
+        self.vad_offset = vad_offset
 
     def get_device(self, device: Union[int, str, "torch.device"]):
         """
@@ -269,8 +260,9 @@ class BatchedInferencePipeline:
             segments_metadata.append(seg_metadata)
         return audio_segments, segments_metadata
 
-    def load_vad_model(self, vad_onset=0.500, vad_offset=0.363):
-        vad_model = Model.from_pretrained(self.vad_model_path)
+    @staticmethod
+    def load_vad_model(vad_onset=0.500, vad_offset=0.363):
+        vad_model = Model.from_pretrained(os.path.join(get_assets_path(), "pyannote_vad_model.bin"))
         hyperparameters = {
             "onset": vad_onset,
             "offset": vad_offset,
@@ -279,7 +271,7 @@ class BatchedInferencePipeline:
         }
 
         vad_pipeline = VoiceActivitySegmentation(
-            segmentation=vad_model, device=torch.device(self.vad_device)
+            segmentation=vad_model, device=torch.device(torch.device("cuda"))
         )
         vad_pipeline.instantiate(hyperparameters)
         return vad_pipeline
