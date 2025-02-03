@@ -119,8 +119,8 @@ class BatchedInferencePipeline:
         options: Optional[NamedTuple] = None,
         tokenizer=None,
         chunk_length: int = 30,
-        vad_onset: float = 0.300,
-        vad_offset: float = 0.200,
+        vad_onset: float = 0.200,
+        vad_offset: float = 0.100,
         language: Optional[str] = None,
     ):
         self.model: WhisperModel = model
@@ -261,13 +261,13 @@ class BatchedInferencePipeline:
         return audio_segments, segments_metadata
 
     @staticmethod
-    def load_vad_model(vad_onset=0.300, vad_offset=0.200):
+    def load_vad_model(vad_onset=0.200, vad_offset=0.100):
         vad_model = Model.from_pretrained(os.path.join(get_assets_path(), "pyannote_vad_model.bin"))
         hyperparameters = {
             "onset": vad_onset,
             "offset": vad_offset,
-            "min_duration_on": 0.0,
-            "min_duration_off": 0.0,
+            "min_duration_on": 0.1,
+            "min_duration_off": 0.1,
         }
 
         vad_pipeline = VoiceActivitySegmentation(
