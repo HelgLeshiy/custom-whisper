@@ -107,7 +107,7 @@ def download_model(
         huggingface_hub.utils.HfHubHTTPError,
         requests.exceptions.ConnectionError,
     ) as exception:
-        logger = get_logger()
+        logger = logging.getLogger("pylogger")
         logger.warning(
             "An error occured while synchronizing the model %s from the Hugging Face Hub:\n%s",
             repo_id,

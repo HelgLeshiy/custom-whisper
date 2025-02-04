@@ -608,7 +608,7 @@ class WhisperModel:
             to file contents as file-like or bytes objects. If this is set, model_path acts as an
             identifier for this model.
         """
-        self.logger = get_logger()
+        self.logger = logging.getLogger("pylogger")
 
         tokenizer_bytes, preprocessor_bytes = None, None
         if files:
